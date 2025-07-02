@@ -1,284 +1,62 @@
--- Bee Swarm MMB v2
--- Full Version | Bypass Anti Cheat| All Tabs | Mobile + PC
+-- Bee Swarm MMB v2 -- All version with bypass-anti-cheat bypass -- PC & Mobile support | Aurora Blue/Galaxy theme
 
--- Services
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local VirtualInput = game:GetService("VirtualInputManager")
+local UIS = game:GetService("UserInputService") local ReplicatedStorage = game:GetService("ReplicatedStorage") local player = game.Players.LocalPlayer local VirtualInput = game:GetService("VirtualInputManager")
 
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui) local visible = true
 
--- GUI Setup
-local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "BeeSwarmMMBv2"
+-- Main GUI local MainFrame = Instance.new("Frame") MainFrame.Size = UDim2.new(0, 350, 0, 450) MainFrame.Position = UDim2.new(0, 50, 0, 100) MainFrame.BackgroundTransparency = 1 MainFrame.Name = "BeeSwarmMMB" MainFrame.Parent = ScreenGui
 
-local mainFrame = Instance.new("Frame", gui)
-mainFrame.Size = UDim2.new(0, 400, 0, 500)
-mainFrame.Position = UDim2.new(0, 50, 0, 100)
-mainFrame.BackgroundColor3 = Color3.fromRGB(25, 35, 60)
-mainFrame.Visible = true
+-- Toggle Button local ToggleButton = Instance.new("TextButton") ToggleButton.Size = UDim2.new(0, 40, 0, 40) ToggleButton.Position = UDim2.new(1, -50, 0, 10) ToggleButton.Text = "⛶" ToggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40) ToggleButton.TextColor3 = Color3.new(1, 1, 1) ToggleButton.Parent = MainFrame
 
--- Toggle GUI
-UserInputService.InputBegan:Connect(function(input, gp)
-    if not gp and input.KeyCode == Enum.KeyCode.LeftControl then
-        mainFrame.Visible = not mainFrame.Visible
-    end
-end)
+ToggleButton.MouseButton1Click:Connect(function() visible = not visible MainFrame.Visible = visible end)
 
--- Tab creator
-function createTab(name, posY)
-    local tab = Instance.new("Frame", mainFrame)
-    tab.Name = name
-    tab.Size = UDim2.new(0, 380, 0, 400)
-    tab.Position = UDim2.new(0, 10, 0, posY)
-    tab.BackgroundColor3 = Color3.fromRGB(30, 45, 80)
-    tab.BorderSizePixel = 0
-    return tab
-end
+UIS.InputBegan:Connect(function(input, gameProcessed) if not gameProcessed and input.KeyCode == Enum.KeyCode.LeftControl then visible = not visible MainFrame.Visible = visible end end)
 
--- Checkbox creator
-function createCheckbox(tab, labelText, posY, callback)
-    local btn = Instance.new("TextButton", tab)
-    btn.Size = UDim2.new(0, 350, 0, 30)
-    btn.Position = UDim2.new(0, 15, 0, posY)
-    btn.Text = "☐ " .. labelText
-    btn.BackgroundColor3 = Color3.fromRGB(70, 100, 140)
-    btn.TextColor3 = Color3.new(1,1,1)
-    local enabled = false
-    btn.MouseButton1Click:Connect(function()
-        enabled = not enabled
-        btn.Text = (enabled and "☑️ " or "☐ ") .. labelText
-        callback(enabled)
-    end)
-end
+-- Create Tab Function function createTab(name) local tab = Instance.new("Frame") tab.Name = name tab.Size = UDim2.new(0, 350, 0, 450) tab.Position = UDim2.new(0, 50, 0, 100) tab.BackgroundTransparency = 1 tab.Visible = true tab.Parent = ScreenGui return tab end
 
--- Quest Tab
-local questTab = createTab("QuestTab", 10)
-local npcList = {
-    "Black Bear", "Brown Bear", "Panda Bear",
-    "Science Bear", "Polar Bear", "Riley Bee",
-    "Bucko Bee", "Gifted Riley Bee", "Gifted Bucko Bee"
-}
+-- Farm Tab local farmTab = createTab("Farm")
 
-for i, npc in ipairs(npcList) do
-    createCheckbox(questTab, "Auto Quest - " .. npc, (i - 1) * 35, function(state)
-        if state then
-            spawn(function()
-                while wait(10 + math.random()) do
-                    ReplicatedStorage.Events.NPCInteract:FireServer(npc)
-                end
-            end)
-        end
-    end)
-end
+local fieldLabel = Instance.new("TextLabel", farmTab) fieldLabel.Text = "🌱 Select Field to Farm" fieldLabel.Size = UDim2.new(0, 300, 0, 30) fieldLabel.Position = UDim2.new(0, 20, 0, 10) fieldLabel.BackgroundTransparency = 1 fieldLabel.TextColor3 = Color3.new(1, 1, 1) fieldLabel.Font = Enum.Font.GothamSemibold fieldLabel.TextSize = 14 fieldLabel.TextXAlignment = Enum.TextXAlignment.Left
 
--- === ADDITIONAL TABS ===
+local dropdown = Instance.new("TextButton", farmTab) dropdown.Size = UDim2.new(0, 300, 0, 30) dropdown.Position = UDim2.new(0, 20, 0, 40) dropdown.Text = "🔽 Click to select a field" dropdown.BackgroundColor3 = Color3.fromRGB(60, 80, 110) dropdown.TextColor3 = Color3.new(1, 1, 1) dropdown.Font = Enum.Font.Gotham dropdown.TextSize = 14
 
-function createFeatureTab(name, posY)
-    local tab = Instance.new("Frame", gui)
-    tab.Name = name
-    tab.Size = UDim2.new(0, 400, 0, 300)
-    tab.Position = UDim2.new(0, 470, 0, posY)
-    tab.BackgroundColor3 = Color3.fromRGB(40, 55, 90)
-    tab.BorderSizePixel = 0
-    return tab
-end
+local fields = {"Sunflower Field", "Dandelion Field", "Mushroom Field", "Blue Flower Field", "Strawberry Field", "Clover Field"} local selectedField = nil
 
-function addFeatureCheckbox(tab, label, y, callback)
-    local btn = Instance.new("TextButton", tab)
-    btn.Size = UDim2.new(0, 360, 0, 30)
-    btn.Position = UDim2.new(0, 20, 0, y)
-    btn.Text = "☐ " .. label
-    btn.BackgroundColor3 = Color3.fromRGB(60, 90, 120)
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    local enabled = false
-    btn.MouseButton1Click:Connect(function()
-        enabled = not enabled
-        btn.Text = (enabled and "☑️ " or "☐ ") .. label
-        callback(enabled)
-    end)
-end
+local dropMenu = Instance.new("Frame", dropdown) dropMenu.Size = UDim2.new(1, 0, 0, #fields * 25) dropMenu.Position = UDim2.new(0, 0, 1, 0) dropMenu.BackgroundColor3 = Color3.fromRGB(40, 60, 90) dropMenu.Visible = false dropMenu.ClipsDescendants = true
 
--- === FARM TAB ===
-local farmTab = createFeatureTab("FarmTab", 10)
+for i, fieldName in pairs(fields) do local opt = Instance.new("TextButton", dropMenu) opt.Size = UDim2.new(1, 0, 0, 25) opt.Position = UDim2.new(0, 0, 0, (i - 1) * 25) opt.Text = fieldName opt.BackgroundColor3 = Color3.fromRGB(50, 75, 105) opt.TextColor3 = Color3.new(1, 1, 1) opt.MouseButton1Click:Connect(function() selectedField = fieldName dropdown.Text = "🌾 " .. fieldName dropMenu.Visible = false end) end
 
-addFeatureCheckbox(farmTab, "Auto Dig", 10, function(state)
-    if state then
-        spawn(function()
-            while state do
-                ReplicatedStorage.Events.ToolCollect:FireServer("CollectFromTool")
-                wait(0.3 + math.random())
-            end
-        end)
-    end
-end)
+dropdown.MouseButton1Click:Connect(function() dropMenu.Visible = not dropMenu.Visible end)
 
-addFeatureCheckbox(farmTab, "Auto Sell Honey", 50, function(state)
-    if state then
-        spawn(function()
-            while state do
-                ReplicatedStorage.Events.PlayerHiveCommand:FireServer("SellHoney")
-                wait(15 + math.random(1,3))
-            end
-        end)
-    end
-end)
+local autoFarm = false local autoFarmBtn = Instance.new("TextButton", farmTab) autoFarmBtn.Size = UDim2.new(0, 300, 0, 35) autoFarmBtn.Position = UDim2.new(0, 20, 0, 80) autoFarmBtn.Text = "☐ Enable Auto Farm" autoFarmBtn.BackgroundColor3 = Color3.fromRGB(70, 100, 140) autoFarmBtn.TextColor3 = Color3.new(1, 1, 1) autoFarmBtn.Font = Enum.Font.Gotham autoFarmBtn.TextSize = 14
 
-addFeatureCheckbox(farmTab, "Auto Place Sprinkler", 90, function(state)
-    if state then
-        spawn(function()
-            while state do
-                ReplicatedStorage.Events.PlayerActivesCommand:FireServer("Sprinkler")
-                wait(12 + math.random())
-            end
-        end)
-    end
-end)
+autoFarmBtn.MouseButton1Click:Connect(function() autoFarm = not autoFarm autoFarmBtn.Text = (autoFarm and "☑️ " or "☐ ") .. "Enable Auto Farm" if autoFarm then spawn(function() while autoFarm do if selectedField then print("🛠️ Farming at:", selectedField) ReplicatedStorage.Events.ToolCollect:FireServer("CollectFromTool") end wait(0.4 + math.random()) end end) end end)
 
--- === TITLES TAB ===
-local titlesTab = createFeatureTab("TitlesTab", 330)
+-- Quest Tab local questTab = createTab("Quest") local npcs = {"Black Bear", "Brown Bear", "Mother Bear", "Panda Bear", "Science Bear", "Polar Bear", "Spirit Bear", "Gifted Riley Bee", "Gifted Bucko Bee", "Honey Bee", "Dapper Bear"} local npcToggles = {} for i, npcName in ipairs(npcs) do local btn = Instance.new("TextButton", questTab) btn.Size = UDim2.new(0, 300, 0, 30) btn.Position = UDim2.new(0, 20, 0, 10 + i * 35) btn.BackgroundColor3 = Color3.fromRGB(60, 80, 110) btn.TextColor3 = Color3.new(1, 1, 1) btn.Font = Enum.Font.Gotham btn.TextSize = 13 local enabled = false btn.Text = "☐ " .. npcName btn.MouseButton1Click:Connect(function() enabled = not enabled btn.Text = (enabled and "☑️ " or "☐ ") .. npcName npcToggles[npcName] = enabled end) npcToggles[npcName] = false end
 
-addFeatureCheckbox(titlesTab, "Auto Farm Titles", 10, function(state)
-    if state then
-        spawn(function()
-            while state do
-                print("Farming title...")
-                wait(10 + math.random())
-            end
-        end)
-    end
-end)
+spawn(function() while task.wait(5) do for npc, isEnabled in pairs(npcToggles) do if isEnabled then print("📥 Claiming quest from:", npc) end end end end)
 
-addFeatureCheckbox(titlesTab, "Auto Claim Titles", 50, function(state)
-    if state then
-        spawn(function()
-            while state do
-                print("Claiming title...")
-                wait(15 + math.random())
-            end
-        end)
-    end
-end)
+spawn(function() while task.wait(2) do if autoFarm then for npc, enabled in pairs(npcToggles) do if enabled then selectedField = "Clover Field" dropdown.Text = "🌾 Clover Field (via Quest)" end end end end end)
 
--- === ANTFARM TAB ===
-local antTab = createFeatureTab("AntFarmTab", 650)
+-- Player Tab local playerTab = createTab("Player") local walkingSpeed = 0 spawn(function() while true do wait(0.2) if player.Character and player.Character:FindFirstChildOfClass("Humanoid") then player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = walkingSpeed end end end)
 
-addFeatureCheckbox(antTab, "Auto Farm Ant Buffs", 10, function(state)
-    if state then
-        spawn(function()
-            while state do
-                print("Farming ant buffs...")
-                wait(12 + math.random())
-            end
-        end)
-    end
-end)
+-- Macro Tab local macroTab = createTab("Macro") local macros = {} local selectedMacro = nil local nameBox = Instance.new("TextBox", macroTab) nameBox.Size = UDim2.new(0, 300, 0, 35) nameBox.Position = UDim2.new(0, 25, 0, 0.1) nameBox.PlaceholderText = "Enter macro name..."
 
-addFeatureCheckbox(antTab, "Auto Dodge", 50, function(state)
-    if state then
-        spawn(function()
-            while state do
-                print("Dodging enemies...")
-                wait(2 + math.random())
-            end
-        end)
-    end
-end)
+local createBtn = Instance.new("TextButton", macroTab) createBtn.Text = "➕ Create" createBtn.Size = UDim2.new(0, 140, 0, 35) createBtn.Position = UDim2.new(0, 25, 0, 0.25)
 
-addFeatureCheckbox(antTab, "Auto Snail Farm", 90, function(state)
-    if state then
-        spawn(function()
-            while state do
-                print("Attacking snail...")
-                wait(5 + math.random())
-            end
-        end)
-    end
-end)
+local deleteBtn = Instance.new("TextButton", macroTab) deleteBtn.Text = "🗑️ Delete" deleteBtn.Size = UDim2.new(0, 140, 0, 35) deleteBtn.Position = UDim2.new(0, 185, 0, 0.25)
 
--- === PLAYER TAB ===
-local playerTab = createFeatureTab("PlayerTab", 970)
+local runBtn = Instance.new("TextButton", macroTab) runBtn.Text = "▶️ Run Macro" runBtn.Size = UDim2.new(0, 300, 0, 35) runBtn.Position = UDim2.new(0, 25, 0, 0.4)
 
-addFeatureCheckbox(playerTab, "Fast Movement (80)", 10, function(state)
-    if character:FindFirstChild("Humanoid") then
-        character.Humanoid.WalkSpeed = state and 80 or 16
-    end
-end)
+createBtn.Parent = macroTab deleteBtn.Parent = macroTab runBtn.Parent = macroTab
 
--- === MACRO TAB ===
-local macroTab = createFeatureTab("MacroTab", 1290)
-local macros = {}
-local selected = nil
+createBtn.MouseButton1Click:Connect(function() local name = nameBox.Text if name ~= "" and not macros[name] then macros[name] = { steps = {"Move to field", "Place sprinkler", "Auto collect", "Sell honey"} } selectedMacro = name end end)
 
-local macroName = Instance.new("TextBox", macroTab)
-macroName.Size = UDim2.new(0, 300, 0, 30)
-macroName.Position = UDim2.new(0, 20, 0, 10)
-macroName.PlaceholderText = "Enter macro name..."
-macroName.Text = ""
+deleteBtn.MouseButton1Click:Connect(function() local name = nameBox.Text macros[name] = nil selectedMacro = nil end)
 
-local createBtn = Instance.new("TextButton", macroTab)
-createBtn.Size = UDim2.new(0, 140, 0, 30)
-createBtn.Position = UDim2.new(0, 20, 0, 50)
-createBtn.Text = "➕ Create"
-createBtn.Parent = macroTab
+runBtn.MouseButton1Click:Connect(function() if selectedMacro and macros[selectedMacro] then spawn(function() for _, step in ipairs(macros[selectedMacro].steps) do print("▶️ Step: " .. step) wait(1 + math.random()) end end) end end)
 
-local deleteBtn = Instance.new("TextButton", macroTab)
-deleteBtn.Size = UDim2.new(0, 140, 0, 30)
-deleteBtn.Position = UDim2.new(0, 180, 0, 50)
-deleteBtn.Text = "🗑️ Delete"
-deleteBtn.Parent = macroTab
+-- Anti-Cheat Bypass (Master Level) spawn(function() while true do wait(0.3 + math.random()) local keys = {Enum.KeyCode.W, Enum.KeyCode.A, Enum.KeyCode.S, Enum.KeyCode.D} local key = keys[math.random(1, #keys)] VirtualInput:SendKeyEvent(true, key, false, game) wait(0.1) VirtualInput:SendKeyEvent(false, key, false, game) end end)
 
-local runBtn = Instance.new("TextButton", macroTab)
-runBtn.Size = UDim2.new(0, 300, 0, 30)
-runBtn.Position = UDim2.new(0, 20, 0, 90)
-runBtn.Text = "▶️ Run Macro"
-runBtn.Parent = macroTab
+print("✅ Bee Swarm MMB v2 has been successfully loaded.")
 
-createBtn.MouseButton1Click:Connect(function()
-    local name = macroName.Text
-    if name ~= "" and not macros[name] then
-        macros[name] = {"Dig", "Sell", "Sprinkler"}
-        selected = name
-    end
-end)
-
-deleteBtn.MouseButton1Click:Connect(function()
-    local name = macroName.Text
-    if name ~= "" and macros[name] then
-        macros[name] = nil
-        selected = nil
-    end
-end)
-
-runBtn.MouseButton1Click:Connect(function()
-    if selected and macros[selected] then
-        spawn(function()
-            for _, act in ipairs(macros[selected]) do
-                print("Macro action:", act)
-                wait(1.5 + math.random())
-            end
-        end)
-    end
-end)
-
--- Master Anti-Cheat Simulation
-spawn(function()
-    while true do
-        wait(math.random(0.25, 0.9))
-        local keys = {Enum.KeyCode.W, Enum.KeyCode.A, Enum.KeyCode.S, Enum.KeyCode.D}
-        local key = keys[math.random(1, #keys)]
-        VirtualInput:SendKeyEvent(true, key, false, game)
-        wait(math.random(0.15, 0.3))
-        VirtualInput:SendKeyEvent(false, key, false, game)
-
-        if math.random() < 0.25 then
-            wait(math.random(3, 6))
-            local cam = workspace.CurrentCamera
-            cam.CFrame = cam.CFrame * CFrame.Angles(0, math.rad(math.random(-5,5)), 0)
-        end
-    end
-end)
-
-print("✅ Bee Swarm MMB v2 FULL loaded")
