@@ -1,4 +1,4 @@
--- Bee Swarm MMB v2 -- All version with bypass-anti-cheat bypass -- PC & Mobile support | Aurora Blue/Galaxy theme
+-- Bee Swarm MMB v2 -- All version with anti-cheat bypass -- PC & Mobile support | Aurora Blue/Galaxy theme
 
 local UIS = game:GetService("UserInputService") local ReplicatedStorage = game:GetService("ReplicatedStorage") local player = game.Players.LocalPlayer local VirtualInput = game:GetService("VirtualInputManager")
 
