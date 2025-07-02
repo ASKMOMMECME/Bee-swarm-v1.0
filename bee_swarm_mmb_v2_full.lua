@@ -282,4 +282,3 @@ spawn(function()
 end)
 
 print("✅ Bee Swarm MMB v2 FULL loaded")
-2 FULL loaded (Master Bypass, All Features)")
